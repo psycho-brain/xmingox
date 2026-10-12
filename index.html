@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-    <title id="page-title">Halloweenクジ</title>
+    <title id="page-title">ラッキークジ引き</title>
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --bg-color: #f0f4f8;
             --bg-image: none;
-            --text-color: #333333;
-            --btn-color: #4CAF50;
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --text-color: #1f2937;
+            --btn-text-color: #ffffff;
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             background-image: var(--bg-image);
             background-size: cover;
@@ -26,555 +24,686 @@
             margin: 0;
             padding: 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
         }
 
         .container {
-            width: 100%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.9);
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
             position: relative;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            backdrop-filter: blur(5px);
         }
 
         h1 {
             font-size: 1.8rem;
-            margin: 0;
+            margin-bottom: 10px;
+            color: var(--text-color);
         }
 
-        .admin-btn {
-            background-color: #555;
-            color: white;
+        p.description {
+            color: #4b5563;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--btn-text-color);
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .admin-btn:hover { background-color: #333; }
-
-        .main-panel, .admin-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .hidden { display: none !important; }
-
-        .draw-section {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        #draw-btn {
-            background-color: var(--btn-color);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
-        }
-        #draw-btn:active { transform: scale(0.98); }
-        #draw-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
-
-        #result-display {
-            font-size: 1.3rem;
+            padding: 12px 24px;
+            font-size: 1rem;
             font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .nav-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: #e5e7eb;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #d1d5db;
+        }
+
+        #result-area {
             margin-top: 20px;
-            min-height: 40px;
-            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .history-section {
-            margin-top: 20px;
+        .status-info {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 15px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        /* モーダル共通スタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .modal-content {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 85vh;
+            overflow-y: auto;
             text-align: left;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: #1f2937;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+
+        .item-list, .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .item-list li, .history-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 0.9rem;
         }
 
-        th { background-color: #f2f2f2; }
-
-        .admin-section {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
+        .item-list li:last-child, .history-list li:last-child {
+            border-bottom: none;
         }
 
-        .admin-section h3 { margin-top: 0; }
-
-        input, select, textarea {
-            padding: 8px;
-            margin: 5px 0 10px 0;
-            width: 100%;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button.action-btn {
-            background-color: #2196F3;
-            color: white;
+        .close-btn {
+            background: #e5e7eb;
+            color: #374151;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: bold;
         }
-        button.action-btn:hover { background-color: #0b7dda; }
 
-        button.danger-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
+        .flex-row {
+            display: flex;
+            gap: 10px;
         }
-        button.danger-btn:hover { background-color: #da190b; }
+
+        .flex-row input {
+            flex: 1;
+        }
     </style>
+    <!-- ユーザー定義カスタムCSS -->
+    <style id="custom-user-css"></style>
 </head>
 <body>
 
     <div class="container">
-        <header>
-            <div>
-                <h1 id="app-title">ワクワククジ引き</h1>
-                <p id="app-description" style="margin: 5px 0 0 0; font-size: 0.9rem; color: #666;">毎日の運試し！何が当たるかな？</p>
-            </div>
-            <div>
-                <button id="toggle-admin-btn" class="admin-btn" onclick="toggleAdmin()">管理画面</button>
-            </div>
-        </header>
-
-        <!-- ユーザー画面 -->
-        <div id="user-view" class="main-panel">
-            <div class="draw-section">
-                <p id="remaining-count" style="font-weight: bold; margin-bottom: 15px;"></p>
-                <button id="draw-btn" onclick="drawLottery()">クジを引く！</button>
-                <div id="result-display"></div>
-            </div>
-
-            <div class="history-section">
-                <h3>当選履歴</h3>
-                <div style="max-height: 200px; overflow-y: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>日時</th>
-                                <th>当たったアイテム</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-table-body">
-                            <!-- 履歴がここに挿入されます -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- 右上の管理画面・履歴ボタン -->
+        <div class="nav-buttons">
+            <button class="icon-btn" onclick="openHistoryModal()" title="当選履歴">📜</button>
+            <button class="icon-btn" onclick="openAdminModal()" title="管理画面">⚙️</button>
         </div>
 
-        <!-- 管理画面 -->
-        <div id="admin-view" class="admin-panel hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>管理画面</h2>
-                <button class="action-btn" onclick="location.reload()" style="background-color: #ff9800;">更新を維持してリロード</button>
+        <h1 id="display-title">ラッキークジ引き</h1>
+        <p class="description" id="display-desc">今日の運試しをしてみましょう！何が当たるかはお楽しみです。</p>
+
+        <button class="btn" id="draw-btn" onclick="drawLottery()">クジを引く</button>
+        
+        <div id="result-area"></div>
+        <div class="status-info" id="status-info">本日残り回数: 3回</div>
+    </div>
+
+    <!-- 当選履歴モーダル -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <h2>当選履歴</h2>
+            <ul id="history-ul" class="history-list">
+                <li style="color: #6b7280; justify-content: center;">履歴はありません</li>
+            </ul>
+            <div style="text-align: right; margin-top: 15px;">
+                <button class="close-btn" onclick="closeModal('history-modal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理者パスワード認証モーダル -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <h2>管理人認証</h2>
+            <p style="font-size: 0.85rem; color: #4b5563;">パスワードを入力してください。（ヒント: days）</p>
+            <div class="form-group">
+                <input type="password" id="admin-password-input" placeholder="パスワード">
+            </div>
+            <div style="text-align: right;">
+                <button class="close-btn" style="background:#4f46e5; color:#fff;" onclick="verifyPassword()">認証</button>
+                <button class="close-btn" onclick="closeModal('auth-modal')">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理画面モーダル -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <h2>管理画面</h2>
+            
+            <div class="form-group">
+                <label>タイトル</label>
+                <input type="text" id="setting-title">
             </div>
 
-            <!-- パスワード認証 -->
-            <div id="auth-section" class="admin-section">
-                <h3>管理人認証</h3>
-                <p style="font-size: 0.85rem; color: #555;">※ソースコードを見ても見えない仕組みで保護されています。管理人にはヒントとして「days」が表示されます。</p>
-                <input type="password" id="admin-pass-input" placeholder="パスワードを入力">
-                <button class="action-btn" onclick="authAdmin()">ログイン</button>
+            <div class="form-group">
+                <label>説明文</label>
+                <textarea id="setting-desc" rows="2"></textarea>
             </div>
 
-            <!-- 認証後メニュー -->
-            <div id="admin-controls" class="hidden">
-                <!-- 回数制限・リセット -->
-                <div class="admin-section">
-                    <h3>制限・回数管理</h3>
-                    <label>1日に引ける回数（現在: <span id="current-limit-display">3</span>回）</label>
-                    <input type="number" id="daily-limit-input" min="1" max="10" value="3">
-                    <button class="action-btn" onclick="updateDailyLimit()">回数を変更</button>
-                    <button class="danger-btn" onclick="resetUserCounts()" style="margin-top: 10px; width: 100%;">本日のユーザーの回数制限をリセット</button>
-                </div>
+            <div class="form-group">
+                <label>当選時のセリフ（一律）</label>
+                <input type="text" id="setting-message">
+            </div>
 
-                <!-- セリフ設定 -->
-                <div class="admin-section">
-                    <h3>当選時のセリフ一括変更</h3>
-                    <input type="text" id="win-message-input" value="おめでとうございます！クジで見事「{item}」を当てました！">
-                    <button class="action-btn" onclick="updateWinMessage()">セリフを保存</button>
-                </div>
+            <div class="form-group">
+                <label>1日のクジ引き回数上限</label>
+                <input type="number" id="setting-limit" min="1" max="10">
+            </div>
 
-                <!-- デザイン設定 -->
-                <div class="admin-section">
-                    <h3>デザイン・表示設定</h3>
-                    <label>タイトル</label>
-                    <input type="text" id="setting-title" value="ワクワククジ引き">
-                    <label>簡単な説明</label>
-                    <input type="text" id="setting-desc" value="毎日の運試し！何が当たるかな？">
+            <div class="form-group">
+                <label>使用回数の強制リセット</label>
+                <button class="btn btn-secondary" style="width: 100%; margin: 0;" onclick="resetDailyUsage()">全ユーザーの利用回数をリセット</button>
+            </div>
+
+            <hr style="border:0; border-top:1px solid #e5e7eb; margin: 20px 0;">
+
+            <h3>デザイン設定</h3>
+            <div class="form-group flex-row">
+                <div>
                     <label>背景色</label>
-                    <input type="color" id="setting-bgcolor" value="#f4f7f6">
-                    <label>背景画像URL（未指定の場合はなし）</label>
-                    <input type="text" id="setting-bgimage" placeholder="https://example.com/image.jpg">
+                    <input type="color" id="setting-bgcolor" style="height:38px; padding:2px;">
+                </div>
+                <div style="flex:2;">
                     <label>文字色</label>
-                    <input type="color" id="setting-textcolor" value="#333333">
-                    <label>クジ引きボタン色</label>
-                    <input type="color" id="setting-btncolor" value="#4CAF50">
-                    <label>カスタムCSS</label>
-                    <textarea id="setting-custom-css" placeholder=".container { border-radius: 0; }"></textarea>
-                    <button class="action-btn" onclick="updateDesignSettings()">デザインを保存</button>
+                    <input type="color" id="setting-textcolor" style="height:38px; padding:2px;">
                 </div>
-
-                <!-- アイテム管理 -->
-                <div class="admin-section">
-                    <h3>アイテム管理</h3>
-                    <div style="margin-bottom: 15px; background: #fff; padding: 10px; border: 1px solid #ddd;">
-                        <h4>新規アイテム追加</h4>
-                        <label>アイテム名称</label>
-                        <input type="text" id="new-item-name" placeholder="例: 特賞 高級肉">
-                        <label>個数 (1〜100)</label>
-                        <input type="number" id="new-item-count" min="1" max="100" value="10">
-                        <button class="action-btn" onclick="addItem()">アイテムを追加して保存</button>
-                    </div>
-
-                    <h4>現在のアイテム一覧</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>名称</th>
-                                <th>残り個数</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-items-table">
-                            <!-- アイテム一覧がここに挿入されます -->
-                        </tbody>
-                    </table>
+                <div style="flex:2;">
+                    <label>ボタン色</label>
+                    <input type="color" id="setting-btncolor" style="height:38px; padding:2px;">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label>背景画像 URL</label>
+                <input type="text" id="setting-bgimage" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <div class="form-group">
+                <label>カスタムCSS</label>
+                <textarea id="setting-custom-css" rows="3" placeholder="/* CSSコードを入力 */"></textarea>
+            </div>
+
+            <hr style="border:0; border-top:1px solid #e5e7eb; margin: 20px 0;">
+
+            <h3>アイテム管理</h3>
+            <div class="form-group">
+                <label>アイテム追加</label>
+                <div class="flex-row" style="margin-bottom: 5px;">
+                    <input type="text" id="new-item-name" placeholder="アイテム名称">
+                    <input type="number" id="new-item-count" min="1" max="100" value="10" style="width: 90px;" placeholder="個数">
+                    <button class="btn" style="margin:0; padding:8px 12px;" onclick="addItem()">追加</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>登録アイテム一覧 / 削除・修正</label>
+                <ul id="admin-item-list" class="item-list"></ul>
+            </div>
+
+            <div class="form-group">
+                <label>履歴からアイテム追加</label>
+                <select id="history-select">
+                    <option value="">履歴から選択...</option>
+                </select>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 5px;" onclick="addFromHistory()">履歴のアイテムを追加</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <button class="btn" style="background-color: #10b981; margin:0;" onclick="saveSettings()">設定を保存して適用</button>
+                <button class="close-btn" onclick="closeModal('admin-modal')">閉じる</button>
             </div>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'lottery_app_data_v2';
+        // --- 初期データ・デフォルト設定 ---
+        const DEFAULT_ITEMS = [
+            { id: 1, name: "特賞：豪華ギフト", count: 5 },
+            { id: 2, name: "1等：お買い物券", count: 15 },
+            { id: 3, name: "2等：お菓子詰め合わせ", count: 30 },
+            { id: 4, name: "参加賞：ポケットティッシュ", count: 50 }
+        ];
 
-        const DEFAULT_DATA = {
-            dailyLimit: 3,
-            winMessage: "おめでとうございます！クジで見事「{item}」を当てました！",
-            title: "ワクワククジ引き",
-            description: "毎日の運試し！何が当たるかな？",
-            bgColor: "#f4f7f6",
+        // コードからも直接アイテムが追加できる拡張関数
+        function registerNewItemDirect(name, count) {
+            let items = getStorage('lottery_items', DEFAULT_ITEMS);
+            items.push({ id: Date.now() + Math.random(), name, count: Math.min(100, Math.max(1, count)) });
+            setStorage('lottery_items', items);
+        }
+
+        const DEFAULT_SETTINGS = {
+            title: "ラッキークジ引き",
+            description: "今日の運試しをしてみましょう！何が当たるかはお楽しみです。",
+            message: "おめでとうございます！見事に当たりました！",
+            limit: 3,
+            bgColor: "#f0f4f8",
+            textColor: "#1f2937",
+            btnColor: "#4f46e5",
             bgImage: "",
-            textColor: "#333333",
-            btnColor: "#4CAF50",
-            customCss: "",
-            items: [
-                { id: 1, name: "特賞: 豪華焼肉セット", count: 1 },
-                { id: 2, name: "C賞：ハロウィン お菓子セット", count: 7 },
-                { id: 3, name: "Y賞：ハロウィンバカデカいチキン", count: 7 },
-                { id: 4, name: "参加賞: ミンゴママ オリジナルステッカー", count: 12 }
-            　　　 
-            ],
-            history: [],
-            userUsage: {},
-            lastResetDate: ""
+            customCss: ""
         };
 
-        let appData = loadData();
-
-        function loadData() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : DEFAULT_DATA;
+        // --- ローラーストレージ ラッパー ---
+        function getStorage(key, defaultValue) {
+            const val = localStorage.getItem(key);
+            return val ? JSON.parse(val) : defaultValue;
         }
 
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        function setStorage(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
         }
 
+        // --- 日付チェック・深夜0時リセット処理 ---
         function checkDailyReset() {
-            const today = new Date().toLocaleDateString();
-            if (appData.lastResetDate !== today) {
-                appData.lastResetDate = today;
-                saveData();
+            const todayStr = new Date().toDateString();
+            const lastDate = localStorage.getItem('lottery_last_date');
+            
+            if (lastDate !== todayStr) {
+                // 日付が変わっている場合、利用回数をリセットし、アイテムを初期数に再補充（または維持）
+                localStorage.setItem('lottery_last_date', todayStr);
+                localStorage.removeItem('lottery_today_count');
+                
+                // アイテムの初期補充や再設定が必要な場合はここで調整
             }
         }
 
+        // --- アプリ初期化 ---
         function initApp() {
             checkDailyReset();
-            applyDesign();
-            updateUserView();
+            applySettingsToUI();
+            updateUserStatus();
         }
 
-        function applyDesign() {
-            document.getElementById('app-title').innerText = appData.title;
-            document.getElementById('page-title').innerText = appData.title;
-            document.getElementById('app-description').innerText = appData.description;
+        function getSettings() {
+            return getStorage('lottery_settings', DEFAULT_SETTINGS);
+        }
+
+        function applySettingsToUI() {
+            const settings = getSettings();
             
+            document.getElementById('page-title').innerText = settings.title;
+            document.getElementById('display-title').innerText = settings.title;
+            document.getElementById('display-desc').innerText = settings.description;
+
+            // デザイン適用
             const root = document.documentElement;
-            root.style.setProperty('--bg-color', appData.bgColor);
-            root.style.setProperty('--bg-image', appData.bgImage ? `url(${appData.bgImage})` : 'none');
-            root.style.setProperty('--text-color', appData.textColor);
-            root.style.setProperty('--btn-color', appData.btnColor);
-
-            let styleTag = document.getElementById('dynamic-custom-css');
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'dynamic-custom-css';
-                document.head.appendChild(styleTag);
-            }
-            styleTag.innerHTML = appData.customCss || '';
-        }
-
-        function getUserTodayKey() {
-            return new Date().toLocaleDateString();
-        }
-
-        function updateUserView() {
-            const today = getUserTodayKey();
-            if (!appData.userUsage[today]) {
-                appData.userUsage[today] = { count: 0 };
-            }
-            const usedCount = appData.userUsage[today].count;
-            const limit = appData.dailyLimit;
-            const remaining = Math.max(0, limit - usedCount);
-
-            document.getElementById('remaining-count').innerText = `本日のクジ引き残り回数: ${remaining} / ${limit} 回`;
+            root.style.setProperty('--bg-color', settings.bgColor);
+            root.style.setProperty('--text-color', settings.textColor);
+            root.style.setProperty('--primary-color', settings.btnColor);
             
-            const drawBtn = document.getElementById('draw-btn');
-            if (remaining <= 0) {
-                drawBtn.disabled = true;
-                drawBtn.innerText = "本日の回数は終了しました";
+            if (settings.bgImage) {
+                root.style.setProperty('--bg-image', `url('${settings.bgImage}')`);
             } else {
-                drawBtn.disabled = false;
-                drawBtn.innerText = "クジを引く！";
+                root.style.setProperty('--bg-image', 'none');
             }
 
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = '';
-            appData.history.slice().reverse().forEach(h => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${h.time}</td><td>${h.item}</td>`;
-                tbody.appendChild(tr);
-            });
+            document.getElementById('custom-user-css').innerHTML = settings.customCss;
         }
 
+        // --- クジ引き機能 ---
         function drawLottery() {
-            const today = getUserTodayKey();
-            if (!appData.userUsage[today]) {
-                appData.userUsage[today] = { count: 0 };
-            }
-            if (appData.userUsage[today].count >= appData.dailyLimit) {
-                alert("本日のクジ引き回数上限に達しています。");
+            checkDailyReset();
+            const settings = getSettings();
+            const limit = settings.limit;
+            let todayCount = parseInt(localStorage.getItem('lottery_today_count') || '0', 10);
+
+            if (todayCount >= limit) {
+                document.getElementById('result-area').innerHTML = `<span style="color:#ef4444;">本日のクジ引き回数（${limit}回）に達しました。</span>`;
                 return;
             }
 
-            let pool = [];
-            appData.items.forEach(item => {
+            let items = getStorage('lottery_items', DEFAULT_ITEMS);
+            // 在庫が残っているアイテムのみ抽出
+            let availablePool = [];
+            items.forEach((item, index) => {
                 for (let i = 0; i < item.count; i++) {
-                    pool.push(item);
+                    availablePool.push(index);
                 }
             });
 
-            if (pool.length === 0) {
-                document.getElementById('result-display').innerText = "現在引けるアイテムがありません。";
+            const resultArea = document.getElementById('result-area');
+
+            if (availablePool.length === 0) {
+                resultArea.innerHTML = `<span style="color:#ef4444;">すべてのクジが終了しました。</span>`;
                 return;
             }
 
-            const index = Math.floor(Math.random() * pool.length);
-            const wonItem = pool[index];
+            // 抽選
+            const randomIndex = Math.floor(Math.random() * availablePool.length);
+            const wonItemIndex = availablePool[randomIndex];
+            const wonItem = items[wonItemIndex];
 
-            const targetItem = appData.items.find(i => i.id === wonItem.id);
-            if (targetItem && targetItem.count > 0) {
-                targetItem.count--;
-            }
+            // 在庫を減らす
+            wonItem.count -= 1;
+            setStorage('lottery_items', items);
 
-            appData.userUsage[today].count++;
-            const nowTime = new Date().toLocaleString();
-            appData.history.push({ time: nowTime, item: wonItem.name });
+            // 回数カウント増やす
+            todayCount++;
+            localStorage.setItem('lottery_today_count', todayCount);
 
-            saveData();
-            updateUserView();
+            // 履歴に保存
+            let history = getStorage('lottery_history', []);
+            history.unshift({
+                name: wonItem.name,
+                time: new Date().toLocaleString()
+            });
+            if (history.length > 50) history.pop(); // 最大50件
+            setStorage('lottery_history', history);
 
-            const message = appData.winMessage.replace('{item}', wonItem.name);
-            document.getElementById('result-display').innerText = message;
+            // 演出・結果表示（ユーザーには何が当たるか事前に見せない）
+            resultArea.innerHTML = `<span style="color:var(--primary-color);">🎉 ${settings.message}<br><small style="color:#374151;">（獲得品：${wonItem.name}）</small></span>`;
+            updateUserStatus();
         }
 
-        function toggleAdmin() {
-            const userView = document.getElementById('user-view');
-            const adminView = document.getElementById('admin-view');
-            userView.classList.toggle('hidden');
-            adminView.classList.toggle('hidden');
+        function updateUserStatus() {
+            const settings = getSettings();
+            const limit = settings.limit;
+            let todayCount = parseInt(localStorage.getItem('lottery_today_count') || '0', 10);
+            const remaining = Math.max(0, limit - todayCount);
+            document.getElementById('status-info').innerText = `本日残り回数: ${remaining}回`;
         }
 
-        function authAdmin() {
-            const passInput = document.getElementById('admin-pass-input').value;
-            if (passInput === 'days') {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('admin-controls').classList.remove('hidden');
-                loadAdminControls();
+        // --- 管理画面・認証関連 ---
+        function openAdminModal() {
+            // 既に管理者としてログイン済み、または継続フラグがある場合は直接開く
+            if (sessionStorage.getItem('admin_logged_in') === 'true') {
+                loadAdminData();
+                document.getElementById('admin-modal').style.display = 'flex';
             } else {
-                alert('パスワードが間違っています。');
+                document.getElementById('admin-password-input').value = '';
+                document.getElementById('auth-modal').style.display = 'flex';
             }
         }
 
-        function loadAdminControls() {
-            document.getElementById('current-limit-display').innerText = appData.dailyLimit;
-            document.getElementById('daily-limit-input').value = appData.dailyLimit;
-            document.getElementById('win-message-input').value = appData.winMessage;
-            
-            document.getElementById('setting-title').value = appData.title;
-            document.getElementById('setting-desc').value = appData.description;
-            document.getElementById('setting-bgcolor').value = appData.bgColor;
-            document.getElementById('setting-bgimage').value = appData.bgImage;
-            document.getElementById('setting-textcolor').value = appData.textColor;
-            document.getElementById('setting-btncolor').value = appData.btnColor;
-            document.getElementById('setting-custom-css').value = appData.customCss;
-
-            renderAdminItems();
+        function verifyPassword() {
+            const pass = document.getElementById('admin-password-input').value;
+            if (pass === 'days') {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                closeModal('auth-modal');
+                loadAdminData();
+                document.getElementById('admin-modal').style.display = 'flex';
+            } else {
+                alert('パスワードが違います。');
+            }
         }
 
-        function updateDailyLimit() {
-            const newLimit = parseInt(document.getElementById('daily-limit-input').value);
-            if (isNaN(newLimit) || newLimit < 1) {
-                alert("有効な数値を入力してください。");
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function loadAdminData() {
+            const settings = getSettings();
+            document.getElementById('setting-title').value = settings.title;
+            document.getElementById('setting-desc').value = settings.description;
+            document.getElementById('setting-message').value = settings.message;
+            document.getElementById('setting-limit').value = settings.limit;
+            document.getElementById('setting-bgcolor').value = settings.bgColor;
+            document.getElementById('setting-textcolor').value = settings.textColor;
+            document.getElementById('setting-btncolor').value = settings.btnColor;
+            document.getElementById('setting-bgimage').value = settings.bgImage;
+            document.getElementById('setting-custom-css').value = settings.customCss;
+
+            renderAdminItemList();
+            renderHistorySelect();
+        }
+
+        function saveSettings() {
+            const settings = {
+                title: document.getElementById('setting-title').value,
+                description: document.getElementById('setting-desc').value,
+                message: document.getElementById('setting-message').value,
+                limit: parseInt(document.getElementById('setting-limit').value, 10) || 3,
+                bgColor: document.getElementById('setting-bgcolor').value,
+                textColor: document.getElementById('setting-textcolor').value,
+                btnColor: document.getElementById('setting-btncolor').value,
+                bgImage: document.getElementById('setting-bgimage').value,
+                customCss: document.getElementById('setting-custom-css').value
+            };
+
+            setStorage('lottery_settings', settings);
+            applySettingsToUI();
+            updateUserStatus();
+            alert('設定を保存しました。管理画面を継続して表示します。');
+        }
+
+        function resetDailyUsage() {
+            if (confirm('本日のクジ引き回数を全ユーザー（このブラウザ）でリセットしますか？')) {
+                localStorage.removeItem('lottery_today_count');
+                updateUserStatus();
+                alert('リセットしました。');
+            }
+        }
+
+        // --- アイテム管理関数 ---
+        function renderAdminItemList() {
+            const items = getStorage('lottery_items', DEFAULT_ITEMS);
+            const listEl = document.getElementById('admin-item-list');
+            listEl.innerHTML = '';
+
+            if (items.length === 0) {
+                listEl.innerHTML = '<li style="color:#6b7280; justify-content:center;">アイテムがありません</li>';
                 return;
             }
-            appData.dailyLimit = newLimit;
-            saveData();
-            document.getElementById('current-limit-display').innerText = newLimit;
-            alert("回数制限を保存・変更しました。");
-            updateUserView();
-        }
 
-        function resetUserCounts() {
-            if (confirm("本日のユーザー利用回数をリセットしますか？")) {
-                const today = getUserTodayKey();
-                if (appData.userUsage[today]) {
-                    appData.userUsage[today].count = 0;
-                }
-                saveData();
-                updateUserView();
-                alert("回数制限をリセットしました。");
-            }
-        }
-
-        function updateWinMessage() {
-            const msg = document.getElementById('win-message-input').value;
-            appData.winMessage = msg;
-            saveData();
-            alert("当選時のセリフを保存しました。");
-        }
-
-        function updateDesignSettings() {
-            appData.title = document.getElementById('setting-title').value;
-            appData.description = document.getElementById('setting-desc').value;
-            appData.bgColor = document.getElementById('setting-bgcolor').value;
-            appData.bgImage = document.getElementById('setting-bgimage').value;
-            appData.textColor = document.getElementById('setting-textcolor').value;
-            appData.btnColor = document.getElementById('setting-btncolor').value;
-            appData.customCss = document.getElementById('setting-custom-css').value;
-            
-            saveData();
-            applyDesign();
-            alert("デザイン設定を保存しました。");
-        }
-
-        function renderAdminItems() {
-            const tbody = document.getElementById('admin-items-table');
-            tbody.innerHTML = '';
-            appData.items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><input type="text" value="${item.name}" onchange="updateItemName(${item.id}, this.value)"></td>
-                    <td><input type="number" min="1" max="100" value="${item.count}" onchange="updateItemCount(${item.id}, this.value)" style="width: 80px;"></td>
-                    <td><button class="danger-btn" onclick="deleteItem(${item.id})">削除</button></td>
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div style="display: flex; gap: 5px; align-items: center; flex: 1;">
+                        <input type="text" value="${item.name}" id="edit-name-${index}" style="padding:4px; font-size:0.85rem; flex:2;">
+                        <input type="number" value="${item.count}" min="1" max="100" id="edit-count-${index}" style="padding:4px; font-size:0.85rem; width:60px;">
+                        <button class="btn-secondary" style="padding:4px 8px; font-size:0.8rem; border-radius:4px; border:none; cursor:pointer;" onclick="updateItem(${index})">更新</button>
+                    </div>
+                    <button style="background:#ef4444; color:#fff; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8rem; margin-left:8px;" onclick="deleteItem(${index})">削除</button>
                 `;
-                tbody.appendChild(tr);
+                listEl.appendChild(li);
             });
         }
 
         function addItem() {
-            const name = document.getElementById('new-item-name').value.trim();
-            const count = parseInt(document.getElementById('new-item-count').value);
+            const nameInput = document.getElementById('new-item-name');
+            const countInput = document.getElementById('new-item-count');
+            const name = nameInput.value.trim();
+            const count = parseInt(countInput.value, 10);
 
             if (!name) {
-                alert("アイテム名を入力してください。");
+                alert('アイテム名称を入力してください。');
                 return;
             }
             if (isNaN(count) || count < 1 || count > 100) {
-                alert("個数は1から100の間で指定してください。");
+                alert('アイテムの個数は1から100の間で指定してください。');
                 return;
             }
 
-            const newId = appData.items.length > 0 ? Math.max(...appData.items.map(i => i.id)) + 1 : 1;
-            appData.items.push({ id: newId, name: name, count: count });
-            
-            // 確実にストレージへ保存
-            saveData();
-            renderAdminItems();
-            
-            document.getElementById('new-item-name').value = '';
-            document.getElementById('new-item-count').value = '10';
-            alert("新しいアイテムを追加して保存しました！");
+            let items = getStorage('lottery_items', DEFAULT_ITEMS);
+            items.push({ id: Date.now(), name, count });
+            setStorage('lottery_items', items);
+
+            nameInput.value = '';
+            countInput.value = '10';
+            renderAdminItemList();
+            renderHistorySelect();
         }
 
-        function updateItemName(id, newName) {
-            const item = appData.items.items ? null : appData.items.find(i => i.id === id);
-            if (item) {
-                item.name = newName;
-                saveData();
+        function updateItem(index) {
+            const name = document.getElementById(`edit-name-${index}`).value.trim();
+            const count = parseInt(document.getElementById(`edit-count-${index}`).value, 10);
+
+            if (!name) {
+                alert('名称は空にできません。');
+                return;
             }
-        }
-
-        function updateItemCount(id, newCount) {
-            const count = parseInt(newCount);
             if (isNaN(count) || count < 1 || count > 100) {
-                alert("個数は1から100の間で指定してください。");
-                renderAdminItems();
+                alert('個数は1から100の間で指定してください。');
                 return;
             }
-            const item = appData.items.find(i => i.id === id);
-            if (item) {
-                item.count = count;
-                saveData();
+
+            let items = getStorage('lottery_items', DEFAULT_ITEMS);
+            items[index].name = name;
+            items[index].count = count;
+            setStorage('lottery_items', items);
+            renderAdminItemList();
+            alert('アイテム情報を更新しました。');
+        }
+
+        function deleteItem(index) {
+            if (confirm('このアイテムを削除しますか？')) {
+                let items = getStorage('lottery_items', DEFAULT_ITEMS);
+                items.splice(index, 1);
+                setStorage('lottery_items', items);
+                renderAdminItemList();
             }
         }
 
-        function deleteItem(id) {
-            if (confirm("このアイテムを削除しますか？")) {
-                appData.items = appData.items.filter(i => i.id !== id);
-                saveData();
-                renderAdminItems();
-            }
+        // --- 履歴からの追加機能 ---
+        function renderHistorySelect() {
+            const history = getStorage('lottery_history', []);
+            const selectEl = document.getElementById('history-select');
+            selectEl.innerHTML = '<option value="">履歴から選択...</option>';
+
+            // 重複のない名称リストを作成
+            const uniqueNames = [...new Set(history.map(h => h.name))];
+            uniqueNames.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                selectEl.appendChild(opt);
+            });
         }
 
+        function addFromHistory() {
+            const selectEl = document.getElementById('history-select');
+            const name = selectEl.value;
+            if (!name) {
+                alert('追加する履歴アイテムを選択してください。');
+                return;
+            }
+
+            let items = getStorage('lottery_items', DEFAULT_ITEMS);
+            items.push({ id: Date.now(), name, count: 10 }); // デフォルト10個で追加
+            setStorage('lottery_items', items);
+            renderAdminItemList();
+            alert(`「${name}」をアイテムに追加しました（個数: 10）。`);
+        }
+
+        // --- 当選履歴モーダル表示 ---
+        function openHistoryModal() {
+            const history = getStorage('lottery_history', []);
+            const ul = document.getElementById('history-ul');
+            ul.innerHTML = '';
+
+            if (history.length === 0) {
+                ul.innerHTML = '<li style="color: #6b7280; justify-content: center;">履歴はありません</li>';
+            } else {
+                history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>🎁 ${item.name}</span><span style="font-size:0.8rem; color:#6b7280;">${item.time}</span>`;
+                    ul.appendChild(li);
+                });
+            }
+            document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        // 初期実行
         window.onload = initApp;
     </script>
 </body>
