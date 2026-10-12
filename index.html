@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="app-title">クジ引きアプリ</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+    <title id="app-title">Halloweenクジ</title>
     <style>
         :root {
             --bg-color: #f0f4f8;
@@ -191,7 +194,7 @@
 
     <div class="container">
         <header>
-            <h1 id="display-title">ラッキーくじ</h1>
+            <h1 id="display-title">Halloweenクジ</h1>
             <div class="top-btns">
                 <button class="btn-secondary" onclick="openHistory()">当選履歴</button>
                 <button class="btn-secondary" onclick="openAdminModal()">管理画面</button>
@@ -334,10 +337,28 @@
 
         // 初期アイテム（コードから複数追加対応）
         let items = JSON.parse(localStorage.getItem(ITEMS_KEY)) || [
-            { id: 1, name: "特賞：豪華旅行券", count: 3 },
-            { id: 2, name: "1等：最新ガジェット", count: 10 },
-            { id: 3, name: "2等：ギフトカード 5000円分", count: 30 },
-            { id: 4, name: "参加賞：お疲れ様でした", count: 100 }
+            { id: 1, name: "特賞：豪華焼肉セット", count: 2 },
+            { id: 2, name: "C賞：ハロウィン お菓子セット", count: 10 },
+            { id: 3, name: "Y賞：ハロウィンバカデカいチキン", count: 10 },
+            { id: 4, name: "ハロウィンキャンディー(嚙みつきゾンビ)", count: 5 },
+            { id: 4, name: "ハロウィンキャンディー(ゆらゆらオバケ)", count: 6 },
+            { id: 4, name: "ハロウィンキャンディー(ぐるぐる猫)", count: 3 },
+            { id: 4, name: "オバケ柄スケスケ紐パン", count: 7 },
+            { id: 4, name: "スカル柄スケスケ紐パン", count: 7 },
+            { id: 4, name: "フラミンゴ柄Tバック", count: 12 },
+            { id: 4, name: "SP賞：脳みそプリン", count: 10 },
+            { id: 4, name: "ハロウィンゴムセット(normal、big、mega)", count: 12 },
+            { id: 4, name: "N賞：ヌルヌルローション", count: 10 },
+            { id: 4, name: "ハロウィンキャンディー", count: 13 },
+            { id: 4, name: "ハロウィングミ(媚薬)", count: 7 },
+            { id: 4, name: "ピンクの妖精なれる着ぐるみ", count: 5 },
+            { id: 4, name: "ドリンク一杯引換券", count: 15 },
+            { id: 4, name: "黒レースの穴あきTバック", count: 7 },
+            { id: 4, name: "マッスルギンギン精力剤", count: 30 },
+            { id: 4, name: "参加賞: ミンゴママ オリジナルステッカー", count: 30 },
+            { id: 4, name: "参加賞: ミンゴママ オリジナルステッカー", count: 30 },
+            { id: 4, name: "参加賞: ミンゴママ オリジナルステッカー", count: 30 },
+            { id: 5, name: "ハロウィンキャンディー(ぐるぐる猫)", count: 100 }
         ];
 
         let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
