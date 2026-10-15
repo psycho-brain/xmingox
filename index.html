@@ -563,8 +563,9 @@
         function addBatchItemsCode() {
             let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
             const batch = [
-                { name: "コード追加アイテム A", count: 15, image: "", info: "Code injected item A" },
-                { name: "コード追加アイテム B", count: 30, image: "", info: "Code injected item B" }
+                { name: "ハロウィンキャンディー(嚙みつきゾンビ)", count: 10, image: "", info: "Code injected item A" },
+                { name: "ハロウィンキャンディー(ゆらゆらオバケ)", count: 10, image: "", info: "Code injected item B" },
+                { name: "ハロウィンキャンディー(ぐるぐる猫)", count: 10, image: "", info: "Code injected item C" }
             ];
             items.push(...batch);
             localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
