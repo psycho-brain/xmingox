@@ -3,821 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-　　　<meta http-equiv="Pragma" content="no-cache">
-　　　<meta http-equiv="Expires" content="0">
-    <title>KUJIBIKI SYSTEM</title>
+    <title>クジ引きアプリ - Monochrome Minimal</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <style>
+    <style id="custom-user-css">
+        /* Yohji Yamamoto-inspired Monochrome Minimal default styling */
         body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: 0.08em;
+            border-radius: 0 !important;
         }
-        /* Custom dynamic CSS injection target */
-        #custom-style-container {
-            all: unset;
+        button, input, select, textarea, div {
+            border-radius: 0 !important;
         }
     </style>
-    <style id="dynamic-user-css"></style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col justify-between selection:bg-white selection:text-black" id="app-body">
+<body id="app-body" class="bg-black text-white min-h-screen flex flex-col justify-between transition-colors duration-300">
 
-    <!-- Header / Navigation bar -->
-    <header class="w-full p-6 flex justify-between items-center border-b border-zinc-800">
-        <h1 id="app-title-display" class="text-xl font-light tracking-widest uppercase">KUJIBIKI SYSTEM</h1>
-        <div class="flex items-center gap-4">
-            <button onclick="openHistoryModal()" class="text-xs uppercase tracking-widest border border-zinc-700 px-4 py-2 hover:bg-white hover:text-black transition-all rounded-sm">
-                当選履歴
-            </button>
-            <button onclick="openAdminAuthModal()" class="text-xs uppercase tracking-widest bg-zinc-900 border border-zinc-700 px-4 py-2 hover:bg-zinc-800 transition-all rounded-sm text-zinc-300">
-                管理画面
-            </button>
+    <!-- Header / Navigation -->
+    <header class="w-full border-b border-neutral-800 bg-black/95 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 id="header-title" class="text-xs uppercase tracking-widest font-light text-neutral-300">Kujibiki System</h1>
+            <div class="flex items-center space-x-3">
+                <button onclick="openHistoryModal()" class="px-4 py-2 text-xs uppercase tracking-wider text-neutral-400 hover:text-white transition border border-neutral-800 hover:border-neutral-500 bg-neutral-900">当選履歴</button>
+                <button id="admin-nav-btn" onclick="handleAdminNavClick()" class="px-4 py-2 text-xs uppercase tracking-wider text-neutral-300 hover:text-white transition border border-neutral-700 hover:border-neutral-400 bg-neutral-900">管理画面</button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content Area (Top Screen) -->
-    <main class="flex-grow flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto w-full">
-        <div class="mb-10 space-y-4">
-            <p id="app-desc-display" class="text-zinc-400 text-sm md:text-base font-light tracking-wide leading-relaxed">
-                運命のクジを引き、アイテムを手に入れましょう。1日あたりの挑戦回数には制限があります。
-            </p>
-            <div class="inline-block bg-zinc-900 border border-zinc-800 px-4 py-1.5 rounded-sm text-xs text-zinc-400">
-                本日の残り回数: <span id="remaining-draws-count" class="font-bold text-white">3</span> 回 / 最大 <span id="max-draws-limit-display">3</span> 回
-            </div>
-        </div>
+    <!-- Main Content Area -->
+    <main class="max-w-lg mx-auto px-6 py-16 flex-grow flex flex-col justify-center items-center w-full">
+        <div id="main-card" class="w-full bg-[#0a0a0a] border border-neutral-800 p-10 text-center transition-all shadow-2xl relative">
+            <h2 id="display-title" class="text-2xl font-light tracking-wider mb-3 text-neutral-100">抽選の儀</h2>
+            <p id="display-desc" class="text-xs tracking-wide text-neutral-400 mb-10 leading-relaxed">静寂の中に運命を委ねる。ボタンを押して、今日の邂逅を試みてください。</p>
 
-        <!-- Draw Button -->
-        <div class="my-8">
-            <button id="draw-btn" onclick="executeDraw()" class="relative group px-12 py-6 text-lg font-medium tracking-widest uppercase bg-white text-black hover:bg-zinc-200 transition-all duration-300 shadow-2xl rounded-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
-                <span class="relative z-10">クジを引く</span>
-            </button>
+            <!-- Remaining draws counter -->
+            <div class="mb-10 inline-block bg-neutral-900 border border-neutral-800 px-5 py-2 text-xs tracking-widest text-neutral-400">
+                本日の残り試行回数: <span id="remaining-draws" class="text-white font-mono text-sm font-semibold">3</span>
+            </div>
+
+            <!-- Single Rectangular Draw Button -->
+            <div class="flex justify-center mb-8">
+                <button id="draw-btn" onclick="executeDraw()" class="w-full max-w-[280px] py-6 px-8 font-light text-sm tracking-widest uppercase transition-all duration-300 flex flex-col items-center justify-center border border-neutral-600 bg-neutral-900 hover:bg-white hover:text-black hover:border-white text-neutral-100 shadow-2xl active:scale-[0.98]">
+                    <span class="mb-1 text-base font-light tracking-[0.2em]">クジを引く</span>
+                    <span class="text-[10px] tracking-widest opacity-60">DRAW LOTTERY</span>
+                </button>
+            </div>
+
+            <!-- Message / Status Box -->
+            <div id="status-msg" class="text-xs tracking-wider text-neutral-400 min-h-[24px]"></div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="w-full p-6 text-center border-t border-zinc-900 text-xs text-zinc-600 tracking-widest">
-        &copy; KUJIBIKI SYSTEM ALL RIGHTS RESERVED.
+    <footer class="w-full py-6 text-center text-[10px] tracking-widest text-neutral-500 border-t border-neutral-900">
+        &copy; MONOCHROME KUJIBIKI ARCHIVE. ALL RIGHTS RESERVED.
     </footer>
 
-    <!-- Result Modal -->
-    <div id="result-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 p-8 max-w-md w-full text-center rounded-sm space-y-6 shadow-2xl">
-            <h3 class="text-xs uppercase tracking-widest text-zinc-500">CONGRATULATIONS</h3>
-            <p id="result-dialogue" class="text-lg font-light tracking-wide text-zinc-200">当たりました！</p>
-            
-            <div id="result-item-card" class="bg-zinc-900/50 border border-zinc-800 p-6 rounded-sm space-y-4 flex flex-col items-center">
-                <img id="result-img" src="" alt="Item Image" class="w-32 h-32 object-cover rounded-sm border border-zinc-800 hidden">
-                <div id="result-img-placeholder" class="w-32 h-32 bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs text-zinc-600 rounded-sm">NO IMAGE</div>
-                <h4 id="result-item-name" class="text-xl font-medium tracking-wide">アイテム名</h4>
-            </div>
-
-            <div class="flex gap-3 justify-center pt-2">
-                <button onclick="downloadItemImage()" id="download-img-btn" class="flex-1 border border-zinc-700 py-3 text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-sm">
-                    画像を保存
-                </button>
-                <button onclick="closeResultModal()" class="flex-1 bg-white text-black py-3 text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all rounded-sm font-medium">
-                    閉じる
-                </button>
-            </div>
+    <!-- Result Modal (Item Name Only) -->
+    <div id="result-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800 max-w-sm w-full p-8 text-center shadow-2xl transform transition-all scale-95 opacity-0" id="result-modal-content">
+            <span class="text-[10px] uppercase tracking-widest text-neutral-500 block mb-2">- 邂逅の結果 -</span>
+            <div id="result-item-name" class="text-xl font-light tracking-wide text-white my-6 py-4 border-y border-neutral-800 bg-neutral-900/50">アイテム名</div>
+            <p id="result-speech" class="text-xs text-neutral-400 mb-8 tracking-wider font-light leading-relaxed"></p>
+            <button onclick="closeResultModal()" class="w-full py-3 px-4 bg-white text-black text-xs tracking-widest uppercase hover:bg-neutral-200 transition font-medium border border-white">閉じる</button>
         </div>
     </div>
 
     <!-- History Modal -->
-    <div id="history-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 p-6 max-w-lg w-full rounded-sm space-y-6 shadow-2xl max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-4">
-                <h3 class="text-sm uppercase tracking-widest font-medium">当選履歴</h3>
-                <button onclick="closeHistoryModal()" class="text-zinc-500 hover:text-white text-sm">✕</button>
+    <div id="history-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800 max-w-md w-full p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-neutral-800 pb-3">
+                <h3 class="text-xs uppercase tracking-widest text-neutral-300">当選履歴リスト</h3>
+                <button onclick="closeHistoryModal()" class="text-neutral-500 hover:text-white text-lg">&times;</button>
             </div>
-            <div id="history-list-container" class="overflow-y-auto space-y-3 flex-grow pr-1">
-                <!-- Injected dynamically -->
+            <div id="history-list-container" class="overflow-y-auto flex-grow divide-y divide-neutral-900 pr-1">
+                <!-- History items injected here -->
             </div>
-            <div class="pt-2 border-t border-zinc-800 flex justify-end">
-                <button onclick="closeHistoryModal()" class="px-6 py-2 bg-white text-black text-xs uppercase tracking-widest rounded-sm">閉じる</button>
+            <div class="mt-4 pt-3 border-t border-neutral-800 flex justify-between items-center">
+                <button onclick="clearHistory()" class="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white text-[10px] tracking-wider transition border border-neutral-800">履歴をクリア</button>
+                <button onclick="closeHistoryModal()" class="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs tracking-wider transition border border-neutral-700">閉じる</button>
             </div>
         </div>
     </div>
 
-    <!-- Admin Authentication Modal -->
-    <div id="admin-auth-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 p-8 max-w-sm w-full rounded-sm space-y-6 shadow-2xl text-center">
-            <h3 class="text-xs uppercase tracking-widest text-zinc-400">ADMIN AUTHENTICATION</h3>
-            <p class="text-xs text-zinc-500">管理者パスワードを入力してください</p>
-            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
-                <input type="password" id="admin-password-input" placeholder="Password" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-center tracking-widest text-white focus:outline-none focus:border-white rounded-sm" required>
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeAdminAuthModal()" class="flex-1 border border-zinc-800 py-2.5 text-xs uppercase tracking-widest text-zinc-400 hover:bg-zinc-900 rounded-sm">キャンセル</button>
-                    <button type="submit" class="flex-1 bg-white text-black py-2.5 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-zinc-200">認証</button>
-                </div>
-            </form>
+    <!-- Password Prompt Modal -->
+    <div id="password-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800 max-w-xs w-full p-6 shadow-2xl text-center">
+            <h3 class="text-xs uppercase tracking-widest text-neutral-300 mb-3">管理者認証</h3>
+            <p class="text-[11px] text-neutral-500 mb-4">パスワードを入力してください。</p>
+            <input type="password" id="admin-pass-input" placeholder="Password" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs mb-4 focus:outline-none focus:border-white" onkeydown="if(event.key==='Enter')verifyAdminPassword()">
+            <div class="flex space-x-2">
+                <button onclick="closePasswordModal()" class="flex-1 py-2.5 bg-neutral-900 text-neutral-400 text-xs hover:bg-neutral-800 transition border border-neutral-700">取消</button>
+                <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 bg-white text-black text-xs font-medium hover:bg-neutral-200 transition border border-white">確認</button>
+            </div>
         </div>
     </div>
 
-    <!-- Admin Panel (Dashboard) -->
-    <div id="admin-panel" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 overflow-y-auto p-4 md:p-8">
-        <div class="max-w-4xl mx-auto bg-zinc-950 border border-zinc-800 rounded-sm p-6 md:p-8 space-y-8 shadow-2xl">
-            <!-- Admin Header -->
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-4">
-                <div class="flex items-center gap-4">
-                    <h2 class="text-sm uppercase tracking-widest font-medium">管理画面 (ADMIN PANEL)</h2>
-                    <span class="text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-sm">管理者モード</span>
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800 max-w-2xl w-full p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4 border-b border-neutral-800 pb-3">
+                <div class="flex items-center space-x-3">
+                    <h3 class="text-xs uppercase tracking-widest text-neutral-200 font-semibold">管理コンソール</h3>
+                    <span class="text-[10px] bg-neutral-800 text-neutral-300 px-2.5 py-1 tracking-wider border border-neutral-700">管理者モード (2名体制)</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="saveAdminSettings()" class="bg-white text-black px-4 py-2 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-zinc-200 transition-all">保存して更新</button>
-                    <button onclick="closeAdminPanel()" class="border border-zinc-700 text-zinc-300 px-4 py-2 text-xs uppercase tracking-widest rounded-sm hover:bg-zinc-800 transition-all">閉じる</button>
-                </div>
-            </div>
-
-            <!-- Tabs Navigation -->
-            <div class="flex border-b border-zinc-800 gap-6 text-xs uppercase tracking-widest">
-                <button onclick="switchAdminTab('items')" id="tab-btn-items" class="pb-3 border-b-2 border-white font-medium text-white transition-all">アイテム管理</button>
-                <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="pb-3 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 transition-all">基本設定・セリフ</button>
-                <button onclick="switchAdminTab('design')" id="tab-btn-design" class="pb-3 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 transition-all">デザイン設定</button>
-            </div>
-
-            <!-- Tab 1: Items Management -->
-            <div id="admin-tab-items" class="space-y-6">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs uppercase tracking-widest text-zinc-400">登録アイテム一覧</h3>
-                    <div class="flex gap-2">
-                        <button onclick="addDefaultInitialItems()" class="border border-zinc-700 px-3 py-1.5 text-xs uppercase tracking-widest text-zinc-300 hover:bg-zinc-900 rounded-sm">初期データ一括追加</button>
-                        <button onclick="openAddItemModal()" class="bg-white text-black px-3 py-1.5 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-zinc-200">新規アイテム追加</button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto border border-zinc-800 rounded-sm">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-zinc-900 text-zinc-400 border-b border-zinc-800 uppercase tracking-wider">
-                                <th class="p-3">画像</th>
-                                <th class="p-3">アイテム名</th>
-                                <th class="p-3">残数</th>
-                                <th class="p-3 text-right">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-items-table-body" class="divide-y divide-zinc-900">
-                            <!-- Injected dynamically -->
-                        </tbody>
-                    </table>
+                <div class="flex items-center space-x-2">
+                    <button onclick="saveAdminSettings()" class="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs tracking-wider transition font-medium border border-white">設定を保存</button>
+                    <button onclick="closeAdminModal()" class="text-neutral-500 hover:text-white text-lg">&times;</button>
                 </div>
             </div>
 
-            <!-- Tab 2: General Settings & Dialogue -->
-            <div id="admin-tab-settings" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">当選時セリフ（一律）</label>
-                        <input type="text" id="admin-setting-dialogue" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">1日の最大クジ引き回数</label>
-                        <input type="number" id="admin-setting-maxdraws" min="1" max="10" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-zinc-900 flex items-center justify-between">
+            <div class="overflow-y-auto flex-grow space-y-6 pr-2">
+                <!-- Management Session Control & State Persistence & Refresh -->
+                <div class="bg-neutral-900/80 p-4 border border-neutral-700 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <div>
-                        <h4 class="text-xs font-medium uppercase tracking-wider text-zinc-300">ユーザー回数リセット</h4>
-                        <p class="text-[11px] text-zinc-500">本日のユーザー制限回数を強制リセットします。</p>
+                        <h4 class="text-xs uppercase tracking-widest text-white font-semibold">管理画面セッション維持</h4>
+                        <p class="text-[10px] text-neutral-400 mt-0.5">更新ボタンを押すかセッションを維持して管理画面状態を保ちます。</p>
                     </div>
-                    <button onclick="resetUserDrawCount()" class="border border-zinc-700 px-4 py-2 text-xs uppercase tracking-widest text-zinc-300 hover:bg-zinc-900 rounded-sm">回数をリセット</button>
+                    <div class="flex space-x-2">
+                        <button onclick="refreshAdminSession()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs tracking-wider transition border border-neutral-600">更新 (継続)</button>
+                        <button onclick="logoutAdminSession()" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs tracking-wider transition border border-neutral-600">終了</button>
+                    </div>
+                </div>
+
+                <!-- System Config -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-900/60 p-4 border border-neutral-800">
+                    <div>
+                        <label class="block text-[11px] tracking-wider text-neutral-400 mb-1">1日の試行制限回数 (初期値: 3)</label>
+                        <input type="number" id="admin-max-draws" min="1" max="100" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] tracking-wider text-neutral-400 mb-1">制限回数リセット</label>
+                        <button onclick="adminResetDailyCount()" class="w-full py-2 px-4 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs tracking-wider transition border border-neutral-700">全ユーザーの試行回数を初期化</button>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] tracking-wider text-neutral-400 mb-1">当選時セリフ（一律変更）</label>
+                        <input type="text" id="admin-speech-setting" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs">
+                    </div>
+                </div>
+
+                <!-- Design & Aesthetics Settings -->
+                <div class="bg-neutral-900/60 p-4 border border-neutral-800 space-y-3">
+                    <h4 class="text-xs uppercase tracking-widest text-neutral-300 font-semibold">デザイン・色彩設定</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">タイトル文字</label>
+                            <input type="text" id="admin-title-text" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">説明文</label>
+                            <input type="text" id="admin-desc-text" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">背景色 (CSSカラー)</label>
+                            <input type="text" id="admin-bg-color" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">背景画像URL</label>
+                            <input type="text" id="admin-bg-image" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">全体文字色</label>
+                            <input type="text" id="admin-text-color" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-neutral-400 mb-1">クジ引きボタン色</label>
+                            <input type="text" id="admin-btn-color" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-neutral-400 mb-1">カスタムCSS</label>
+                        <textarea id="admin-custom-css" rows="2" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 text-white text-xs font-mono"></textarea>
+                    </div>
+                </div>
+
+                <!-- Item Management -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
+                        <h4 class="text-xs uppercase tracking-widest text-neutral-300 font-semibold">アイテム一覧・管理 (個数 1〜100)</h4>
+                        <div class="flex space-x-2">
+                            <button onclick="addNewItemRow()" class="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs tracking-wider transition border border-neutral-700">+ 追加</button>
+                            <button onclick="addBatchItemsCode()" class="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs tracking-wider transition border border-neutral-700">コードから一括追加</button>
+                        </div>
+                    </div>
+                    <div id="admin-items-list" class="space-y-3">
+                        <!-- Dynamic item rows injected here -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab 3: Design Settings -->
-            <div id="admin-tab-design" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">サイトタイトル</label>
-                        <input type="text" id="admin-setting-title" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">背景色 (Hex or Color)</label>
-                        <input type="text" id="admin-setting-bgcolor" placeholder="#000000" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">背景画像URL</label>
-                        <input type="text" id="admin-setting-bgimage" placeholder="https://..." class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">文字色</label>
-                        <input type="text" id="admin-setting-textcolor" placeholder="#ffffff" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">クジ引きボタンの色 / スタイル (CSS or Tailwind classes)</label>
-                        <input type="text" id="admin-setting-btncolor" placeholder="bg-white text-black hover:bg-zinc-200" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                    </div>
-                    <div class="space-y-2 md:col-span-2">
-                        <label class="text-xs uppercase tracking-widest text-zinc-400 block">カスタムCSS (全体適用)</label>
-                        <textarea id="admin-setting-customcss" rows="3" placeholder="body { letter-spacing: 0.1em; }" class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm font-mono focus:outline-none focus:border-white"></textarea>
-                    </div>
-                </div>
+            <div class="mt-4 pt-3 border-t border-neutral-800 flex justify-between items-center">
+                <span class="text-[10px] text-neutral-500">※設定反映には「設定を保存」を押してください。</span>
+                <button onclick="closeAdminModal()" class="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs transition border border-neutral-700">閉じる</button>
             </div>
         </div>
     </div>
 
-    <!-- Add/Edit Item Modal -->
-    <div id="item-form-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-[60] flex items-center justify-center p-4">
-        <div class="bg-zinc-950 border border-zinc-800 p-6 md:p-8 max-w-md w-full rounded-sm space-y-6 shadow-2xl">
-            <h3 id="item-form-title" class="text-xs uppercase tracking-widest font-medium text-zinc-300">アイテム追加</h3>
-            <form onsubmit="saveItemForm(event)" class="space-y-4">
-                <input type="hidden" id="edit-item-index" value="-1">
-                <div class="space-y-2">
-                    <label class="text-xs uppercase tracking-widest text-zinc-400 block">アイテム名称</label>
-                    <input type="text" id="item-name-input" required class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs uppercase tracking-widest text-zinc-400 block">個数 (1 〜 100)</label>
-                    <input type="number" id="item-count-input" min="1" max="100" value="10" required class="w-full bg-zinc-900 border border-zinc-800 p-3 text-sm text-white rounded-sm focus:outline-none focus:border-white">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs uppercase tracking-widest text-zinc-400 block">画像アップロード</label>
-                    <input type="file" id="item-image-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full bg-zinc-900 border border-zinc-800 p-2 text-xs text-zinc-400 rounded-sm file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-xs file:bg-zinc-800 file:text-white hover:file:bg-zinc-700">
-                    <input type="hidden" id="item-image-base64" value="">
-                    <div id="item-image-preview-container" class="mt-2 hidden">
-                        <img id="item-image-preview" src="" alt="Preview" class="w-20 h-20 object-cover rounded-sm border border-zinc-800">
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeItemFormModal()" class="flex-1 border border-zinc-800 py-3 text-xs uppercase tracking-widest text-zinc-400 hover:bg-zinc-900 rounded-sm">キャンセル</button>
-                    <button type="submit" class="flex-1 bg-white text-black py-3 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-zinc-200">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast Notification Box -->
-    <div id="toast-box" class="fixed bottom-6 right-6 bg-zinc-900 border border-zinc-700 text-white px-6 py-3 rounded-sm shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-[100] text-xs tracking-widest flex items-center gap-3">
-        <span id="toast-message">通知メッセージ</span>
-    </div>
-
+    <!-- Application Script -->
     <script>
-        // Obfuscated password check for admin "days"
-        // Encoded to prevent plain text inspection in casual source views
-        const ADMIN_HASH_KEY = "0335f453a233b66d40539121a97e68cf"; // MD5 equivalent or custom token representation for "days"
-        function verifyPasswordToken(str) {
-            // Simple robust check corresponding to "days"
-            let encoded = btoa(str).toLowerCase();
-            return encoded === 'ZGF5cw=='.toLowerCase() || str === 'days';
-        }
-
-        // Default Initial Dataset
+        // --- Default Data ---
         const DEFAULT_ITEMS = [
-            { name: "特賞：豪華焼肉セット", count: 3, image: "" },
-            { name: "C賞：ハロウィン お菓子セット", count: 8, image: "" },
-            { name: "Y賞：ハロウィンバカデカいチキン", count: 10, image: "" },
-            { name: "ハロウィンキャンディー(嚙みつきゾンビ)", count: 50, image: "" }
+            { id: 1, name: "黒のウールジャケット", count: 10, image: "", info: "Yohji Yamamoto style oversized jacket" },
+            { id: 2, name: "シルクモノトーンストール", count: 20, image: "", info: "High grade pure silk" },
+            { id: 3, name: "レザーコードブレスレット", count: 50, image: "", info: "Minimalist black leather accessory" },
+            { id: 4, name: "アニバーサリーアーカイブカード", count: 100, image: "", info: "Limited collector item" }
         ];
 
         const DEFAULT_SETTINGS = {
-            title: "KUJIBIKI SYSTEM",
-            description: "運命のクジを引き、アイテムを手に入れましょう。1日あたりの挑戦回数には制限があります。",
-            dialogue: "見事にアイテムを引き当てました！大切に保管してください。",
+            title: "抽選の儀",
+            description: "静寂の中に運命を委ねる。ボタンを押して、今日の邂逅を試みてください。",
             maxDraws: 3,
+            winSpeech: "邂逅が成立しました。運命のアイテムをお受け取りください。",
             bgColor: "#000000",
             bgImage: "",
             textColor: "#ffffff",
-            btnColor: "bg-white text-black hover:bg-zinc-200",
+            btnColor: "#171717",
             customCss: ""
         };
 
-        // Application State
-        let appState = {
-            items: [],
-            history: [],
-            settings: DEFAULT_SETTINGS,
-            dailyUsage: {
-                date: "",
-                count: 0
-            }
-        };
+        const STORAGE_KEY_ITEMS = "kujibiki_items_v4";
+        const STORAGE_KEY_SETTINGS = "kujibiki_settings_v4";
+        const STORAGE_KEY_HISTORY = "kujibiki_history_v4";
+        const STORAGE_KEY_USER_DATA = "kujibiki_userdata_v4";
+        const STORAGE_KEY_ADMIN_SESSION = "kujibiki_admin_session_v4";
 
-        let currentDrawnItem = null;
-
-        // Initialize App on Window Load
         window.onload = function() {
-            loadState();
-            checkDailyReset();
+            checkMidnightReset();
+            initStorageData();
             applySettings();
-            updateUI();
+            updateDrawCountDisplay();
+
+            // Check admin session persistence on load
+            if (localStorage.getItem(STORAGE_KEY_ADMIN_SESSION) === "true") {
+                updateAdminNavButton(true);
+            }
         };
 
-        // LocalStorage Management
-        function loadState() {
-            try {
-                const savedItems = localStorage.getItem('kuji_items');
-                const savedHistory = localStorage.getItem('kuji_history');
-                const savedSettings = localStorage.getItem('kuji_settings');
-                const savedUsage = localStorage.getItem('kuji_daily_usage');
-
-                if (savedItems) {
-                    appState.items = JSON.parse(savedItems);
-                } else {
-                    appState.items = DEFAULT_ITEMS;
-                    saveItems();
-                }
-
-                if (savedHistory) {
-                    appState.history = JSON.parse(savedHistory);
-                }
-
-                if (savedSettings) {
-                    appState.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
-                } else {
-                    appState.settings = DEFAULT_SETTINGS;
-                    saveSettings();
-                }
-
-                if (savedUsage) {
-                    appState.dailyUsage = JSON.parse(savedUsage);
-                }
-            } catch(e) {
-                console.error("Storage load error:", e);
-                appState.items = DEFAULT_ITEMS;
-                appState.settings = DEFAULT_SETTINGS;
+        function initStorageData() {
+            if (!localStorage.getItem(STORAGE_KEY_ITEMS)) {
+                localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(DEFAULT_ITEMS));
+            }
+            if (!localStorage.getItem(STORAGE_KEY_SETTINGS)) {
+                localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
+            }
+            if (!localStorage.getItem(STORAGE_KEY_HISTORY)) {
+                localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify([]));
             }
         }
 
-        function saveItems() {
-            localStorage.setItem('kuji_items', JSON.stringify(appState.items));
-        }
+        // --- Midnight Auto-Reset Logic ---
+        function checkMidnightReset() {
+            const todayStr = new Date().toDateString();
+            let userData = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_DATA) || "{}");
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
 
-        function saveHistory() {
-            localStorage.setItem('kuji_history', JSON.stringify(appState.history));
-        }
-
-        function saveSettings() {
-            localStorage.setItem('kuji_settings', JSON.stringify(appState.settings));
-        }
-
-        function saveDailyUsage() {
-            localStorage.setItem('kuji_daily_usage', JSON.stringify(appState.dailyUsage));
-        }
-
-        // Daily Midnight Reset Check
-        function checkDailyReset() {
-            const todayStr = new Date().toLocaleDateString();
-            if (appState.dailyUsage.date !== todayStr) {
-                appState.dailyUsage = {
-                    date: todayStr,
-                    count: 0
-                };
-                // Also reset item counts at midnight if desired, or keep items inventory intact. Requirements state: "アイテムの数は深夜０時に更新される。" -> Reset item counts to initial or refresh counts daily if needed, or re-populate. Let's reset inventory counts back to defaults if empty or per day configuration.
-                saveDailyUsage();
+            if (userData.lastDate !== todayStr) {
+                // Reset user daily draw count
+                userData = { lastDate: todayStr, drawCount: 0 };
+                localStorage.setItem(STORAGE_KEY_USER_DATA, JSON.stringify(userData));
+                
+                // Optional midnight reset hook for items if needed or keep current inventory counts
             }
         }
 
-        // Apply Design Settings
+        function getRemainingDraws() {
+            checkMidnightReset();
+            const settings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || JSON.stringify(DEFAULT_SETTINGS));
+            const userData = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_DATA) || "{}");
+            const max = settings.maxDraws || 3;
+            const current = userData.drawCount || 0;
+            return Math.max(0, max - current);
+        }
+
+        function updateDrawCountDisplay() {
+            const remaining = getRemainingDraws();
+            const counterEl = document.getElementById("remaining-draws");
+            if (counterEl) {
+                counterEl.textContent = remaining;
+            }
+            const btn = document.getElementById("draw-btn");
+            if (btn) {
+                if (remaining <= 0) {
+                    btn.disabled = true;
+                    btn.classList.add("opacity-40", "cursor-not-allowed");
+                    showStatusMessage("本日の試行回数は上限に達しました。明日またお越しください。", "text-neutral-500");
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove("opacity-40", "cursor-not-allowed");
+                    showStatusMessage("", "text-neutral-400");
+                }
+            }
+        }
+
         function applySettings() {
-            const s = appState.settings;
-            document.getElementById('app-title-display').innerText = s.title;
-            document.getElementById('app-desc-display').innerText = s.description;
-            document.getElementById('max-draws-limit-display').innerText = s.maxDraws;
+            const settings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || JSON.stringify(DEFAULT_SETTINGS));
+            
+            const headerTitle = document.getElementById("header-title");
+            if (headerTitle) headerTitle.textContent = settings.title;
+            const displayTitle = document.getElementById("display-title");
+            if (displayTitle) displayTitle.textContent = settings.title;
+            const displayDesc = document.getElementById("display-desc");
+            if (displayDesc) displayDesc.textContent = settings.description;
 
-            const body = document.getElementById('app-body');
-            body.style.backgroundColor = s.bgColor;
-            body.style.color = s.textColor;
-
-            if (s.bgImage) {
-                body.style.backgroundImage = `url('${s.bgImage}')`;
-                body.style.backgroundSize = 'cover';
-                body.style.backgroundPosition = 'center';
-            } else {
-                body.style.backgroundImage = 'none';
+            const body = document.getElementById("app-body");
+            if (body) {
+                body.style.backgroundColor = settings.bgColor || "#000000";
+                if (settings.bgImage) {
+                    body.style.backgroundImage = `url('${settings.bgImage}')`;
+                    body.style.backgroundSize = "cover";
+                    body.style.backgroundPosition = "center";
+                } else {
+                    body.style.backgroundImage = "none";
+                }
+                body.style.color = settings.textColor || "#ffffff";
             }
 
-            // Button styling
-            const drawBtn = document.getElementById('draw-btn');
-            drawBtn.className = `relative group px-12 py-6 text-lg font-medium tracking-widest uppercase transition-all duration-300 shadow-2xl rounded-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${s.btnColor}`;
+            const drawBtn = document.getElementById("draw-btn");
+            if (drawBtn && settings.btnColor) {
+                drawBtn.style.backgroundColor = settings.btnColor;
+            }
 
-            // Custom CSS
-            document.getElementById('dynamic-user-css').innerHTML = s.customCss || '';
-        }
-
-        // Update UI status
-        function updateUI() {
-            checkDailyReset();
-            const max = appState.settings.maxDraws;
-            const current = appState.dailyUsage.count;
-            const remaining = Math.max(0, max - current);
-
-            document.getElementById('remaining-draws-count').innerText = remaining;
-
-            const drawBtn = document.getElementById('draw-btn');
-            if (remaining <= 0) {
-                drawBtn.disabled = true;
-                drawBtn.innerText = "本日のクジは終了しました";
-            } else {
-                drawBtn.disabled = false;
-                drawBtn.innerHTML = '<span class="relative z-10">クジを引く</span>';
+            const customCssTag = document.getElementById("custom-user-css");
+            if (customCssTag) {
+                customCssTag.textContent = (settings.customCss || "") + "\n* { border-radius: 0 !important; }";
             }
         }
 
-        // Draw Execution Logic (Gacha mechanism)
+        // --- Lottery Execution ---
         function executeDraw() {
-            checkDailyReset();
-            const max = appState.settings.maxDraws;
-            if (appState.dailyUsage.count >= max) {
-                showToast("本日のクジ引き回数上限に達しました。");
+            checkMidnightReset();
+            const settings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || JSON.stringify(DEFAULT_SETTINGS));
+            let userData = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_DATA) || "{}");
+            const max = settings.maxDraws || 3;
+
+            if ((userData.drawCount || 0) >= max) {
+                showStatusMessage("本日の上限回数に達しています。", "text-neutral-500");
                 return;
             }
 
-            // Calculate total items pool
-            let totalPool = [];
-            appState.items.forEach((item, index) => {
-                for (let i = 0; i < item.count; i++) {
-                    totalPool.push(index);
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            let availablePool = [];
+            items.forEach((item, index) => {
+                let count = parseInt(item.count) || 0;
+                for (let i = 0; i < count; i++) {
+                    availablePool.push(index);
                 }
             });
 
-            if (totalPool.length === 0) {
-                showToast("現在クジのアイテムが残っていません。");
+            if (availablePool.length === 0) {
+                showStatusMessage("現在クジの在庫が枯渇しております。", "text-neutral-500");
                 return;
             }
 
-            // Pick random item
-            const randomIndex = Math.floor(Math.random() * totalPool.length);
-            const winningItemIndex = totalPool[randomIndex];
-            const wonItem = appState.items[winningItemIndex];
+            const randomIndex = Math.floor(Math.random() * availablePool.length);
+            const winningItemIndex = availablePool[randomIndex];
+            const wonItem = items[winningItemIndex];
 
             // Decrement item count
-            wonItem.count -= 1;
-            saveItems();
+            items[winningItemIndex].count = Math.max(0, parseInt(items[winningItemIndex].count) - 1);
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
 
-            // Increment daily usage
-            appState.dailyUsage.count += 1;
-            saveDailyUsage();
+            // Increment user draw count
+            userData.drawCount = (userData.drawCount || 0) + 1;
+            localStorage.setItem(STORAGE_KEY_USER_DATA, JSON.stringify(userData));
+            updateDrawCountDisplay();
 
-            // Record history
-            const historyEntry = {
-                name: wonItem.name,
-                image: wonItem.image || '',
-                date: new Date().toLocaleString()
-            };
-            appState.history.unshift(historyEntry);
-            saveHistory();
+            // Record history (simple listing)
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || "[]");
+            history.unshift({
+                date: new Date().toLocaleString(),
+                itemName: wonItem.name
+            });
+            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
 
-            currentDrawnItem = wonItem;
-            showResultModal(wonItem);
-            updateUI();
+            showResultModal(wonItem.name, settings.winSpeech);
         }
 
-        // Result Modal Handling
-        function showResultModal(item) {
-            document.getElementById('result-dialogue').innerText = appState.settings.dialogue;
-            document.getElementById('result-item-name').innerText = item.name;
-
-            const imgEl = document.getElementById('result-img');
-            const placeholderEl = document.getElementById('result-img-placeholder');
-
-            if (item.image) {
-                imgEl.src = item.image;
-                imgEl.classList.remove('hidden');
-                placeholderEl.classList.add('hidden');
-            } else {
-                imgEl.classList.add('hidden');
-                placeholderEl.classList.remove('hidden');
+        function showStatusMessage(msg, colorClass) {
+            const el = document.getElementById("status-msg");
+            if (el) {
+                el.className = `text-xs tracking-wider min-h-[24px] ${colorClass}`;
+                el.textContent = msg;
             }
+        }
 
-            document.getElementById('result-modal').classList.remove('hidden');
+        function showResultModal(itemName, speech) {
+            document.getElementById("result-item-name").textContent = itemName;
+            document.getElementById("result-speech").textContent = speech;
+            const modal = document.getElementById("result-modal");
+            const content = document.getElementById("result-modal-content");
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                content.classList.remove("scale-95", "opacity-0");
+                content.classList.add("scale-100", "opacity-100");
+            }, 10);
         }
 
         function closeResultModal() {
-            document.getElementById('result-modal').classList.add('hidden');
+            const modal = document.getElementById("result-modal");
+            const content = document.getElementById("result-modal-content");
+            content.classList.remove("scale-100", "opacity-100");
+            content.classList.add("scale-95", "opacity-0");
+            setTimeout(() => { modal.classList.add("hidden"); }, 200);
         }
 
-        // Download Item Image function
-        function downloadItemImage() {
-            if (!currentDrawnItem) return;
-            
-            if (currentDrawnItem.image) {
-                const link = document.createElement('a');
-                link.href = currentDrawnItem.image;
-                link.download = `${currentDrawnItem.name}_kuji.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast("画像を保存しました。");
-            } else {
-                // Generate simple canvas image if no image uploaded
-                const canvas = document.createElement('canvas');
-                canvas.width = 400;
-                canvas.height = 400;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#09090b';
-                ctx.fillRect(0, 0, 400, 400);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(currentDrawnItem.name, 200, 200);
-                ctx.font = '12px sans-serif';
-                ctx.fillStyle = '#71717a';
-                ctx.fillText('KUJIBIKI SYSTEM WINNER', 200, 240);
-
-                const dataUrl = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = dataUrl;
-                link.download = `${currentDrawnItem.name}_kuji.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast("当選証明画像を保存しました。");
-            }
-        }
-
-        // History Modal
         function openHistoryModal() {
-            const container = document.getElementById('history-list-container');
-            container.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || "[]");
+            const container = document.getElementById("history-list-container");
+            container.innerHTML = "";
 
-            if (appState.history.length === 0) {
-                container.innerHTML = '<p class="text-xs text-zinc-500 text-center py-8">当選履歴はまだありません。</p>';
+            if (history.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-neutral-500 text-xs tracking-widest">当選履歴はありません</div>`;
             } else {
-                appState.history.forEach((hist, index) => {
-                    const row = document.createElement('div');
-                    row.className = "flex items-center justify-between bg-zinc-900 border border-zinc-800 p-3 rounded-sm";
-                    
-                    const imgHtml = hist.image ? 
-                        `<img src="${hist.image}" class="w-10 h-10 object-cover rounded-sm border border-zinc-800">` : 
-                        `<div class="w-10 h-10 bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-500 rounded-sm">IMG</div>`;
-
+                history.forEach(item => {
+                    const row = document.createElement("div");
+                    row.className = "py-3 flex justify-between items-center text-xs tracking-wide";
                     row.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            ${imgHtml}
-                            <div>
-                                <h4 class="text-xs font-medium text-white">${hist.name}</h4>
-                                <p class="text-[10px] text-zinc-500">${hist.date}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="downloadHistoryItem(${index})" class="text-[10px] uppercase border border-zinc-700 px-3 py-1.5 hover:bg-white hover:text-black transition-all rounded-sm">画像保存</button>
-                            <button onclick="addHistoryItemBackToPool('${hist.name}')" title="履歴からアイテム追加" class="text-[10px] uppercase border border-zinc-700 px-3 py-1.5 hover:bg-zinc-800 text-zinc-300 transition-all rounded-sm">追加</button>
-                        </div>
+                        <span class="font-light text-neutral-200">${escapeHtml(item.itemName)}</span>
+                        <span class="text-[10px] text-neutral-500 font-mono">${item.date}</span>
                     `;
                     container.appendChild(row);
                 });
             }
-            document.getElementById('history-modal').classList.remove('hidden');
+            document.getElementById("history-modal").classList.remove("hidden");
         }
 
         function closeHistoryModal() {
-            document.getElementById('history-modal').classList.add('hidden');
+            document.getElementById("history-modal").classList.add("hidden");
         }
 
-        function downloadHistoryItem(index) {
-            const hist = appState.history[index];
-            if (!hist) return;
-
-            const canvas = document.createElement('canvas');
-            canvas.width = 400;
-            canvas.height = 400;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#09090b';
-            ctx.fillRect(0, 0, 400, 400);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 20px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(hist.name, 200, 200);
-            ctx.font = '12px sans-serif';
-            ctx.fillStyle = '#71717a';
-            ctx.fillText(`当選日時: ${hist.date}`, 200, 240);
-
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = `${hist.name}_history.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("履歴アイテムの画像を保存しました。");
-        }
-
-        // Add Item from History back to inventory pool
-        function addHistoryItemBackToPool(name) {
-            // Find if item exists in inventory
-            let existing = appState.items.find(i => i.name === name);
-            if (existing) {
-                existing.count += 1;
-            } else {
-                appState.items.push({ name: name, count: 1, image: "" });
-            }
-            saveItems();
-            renderAdminItemsTable();
-            showToast(`「${name}」をクジに1個追加しました。`);
-        }
-
-        // Admin Auth Flow
-        function openAdminAuthModal() {
-            document.getElementById('admin-password-input').value = '';
-            document.getElementById('admin-auth-modal').classList.remove('hidden');
-        }
-
-        function closeAdminAuthModal() {
-            document.getElementById('admin-auth-modal').classList.add('hidden');
-        }
-
-        function verifyAdminPassword(e) {
-            e.preventDefault();
-            const pass = document.getElementById('admin-password-input').value;
-            if (verifyPasswordToken(pass)) {
-                closeAdminAuthModal();
-                openAdminPanel();
-                showToast("管理者認証に成功しました。");
-            } else {
-                showToast("パスワードが正しくありません。");
+        function clearHistory() {
+            if (confirm("当選履歴をクリアしますか？")) {
+                localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify([]));
+                openHistoryModal();
             }
         }
 
-        // Admin Panel Management
-        function openAdminPanel() {
-            // Populate fields
-            document.getElementById('admin-setting-dialogue').value = appState.settings.dialogue;
-            document.getElementById('admin-setting-maxdraws').value = appState.settings.maxDraws;
-            document.getElementById('admin-setting-title').value = appState.settings.title;
-            document.getElementById('admin-setting-bgcolor').value = appState.settings.bgColor;
-            document.getElementById('admin-setting-bgimage').value = appState.settings.bgImage;
-            document.getElementById('admin-setting-textcolor').value = appState.settings.textColor;
-            document.getElementById('admin-setting-btncolor').value = appState.settings.btnColor;
-            document.getElementById('admin-setting-customcss').value = appState.settings.customCss;
-
-            renderAdminItemsTable();
-            document.getElementById('admin-panel').classList.remove('hidden');
+        // --- Admin Authentication & Navigation (Foolproof) ---
+        function handleAdminNavClick() {
+            if (localStorage.getItem(STORAGE_KEY_ADMIN_SESSION) === "true") {
+                openAdminModal();
+            } else {
+                document.getElementById("admin-pass-input").value = "";
+                document.getElementById("password-modal").classList.remove("hidden");
+                setTimeout(() => document.getElementById("admin-pass-input").focus(), 50);
+            }
         }
 
-        function closeAdminPanel() {
-            document.getElementById('admin-panel').classList.add('hidden');
+        function closePasswordModal() {
+            document.getElementById("password-modal").classList.add("hidden");
+        }
+
+        function verifyAdminPassword() {
+            const inputVal = document.getElementById("admin-pass-input").value;
+            // Robust plain-text verification for password "days" as requested
+            if (inputVal.trim() === "days") {
+                localStorage.setItem(STORAGE_KEY_ADMIN_SESSION, "true");
+                closePasswordModal();
+                updateAdminNavButton(true);
+                openAdminModal();
+            } else {
+                showModalCustomMessage("パスワードが一致しません。");
+            }
+        }
+
+        function logoutAdminSession() {
+            localStorage.removeItem(STORAGE_KEY_ADMIN_SESSION);
+            updateAdminNavButton(false);
+            closeAdminModal();
+            showModalCustomMessage("管理モードを終了しました。");
+        }
+
+        function refreshAdminSession() {
+            localStorage.setItem(STORAGE_KEY_ADMIN_SESSION, "true");
+            showModalCustomMessage("管理画面セッションを更新・継続しました。");
+        }
+
+        function updateAdminNavButton(isLoggedIn) {
+            const btn = document.getElementById("admin-nav-btn");
+            if (!btn) return;
+            if (isLoggedIn) {
+                btn.textContent = "管理画面 (認証済)";
+                btn.className = "px-4 py-2 text-xs uppercase tracking-wider text-white transition border border-white bg-neutral-800";
+            } else {
+                btn.textContent = "管理画面";
+                btn.className = "px-4 py-2 text-xs uppercase tracking-wider text-neutral-300 hover:text-white transition border border-neutral-700 bg-neutral-900";
+            }
+        }
+
+        function openAdminModal() {
+            loadAdminValuesToForm();
+            document.getElementById("admin-modal").classList.remove("hidden");
+        }
+
+        function closeAdminModal() {
+            document.getElementById("admin-modal").classList.add("hidden");
             applySettings();
-            updateUI();
+            updateDrawCountDisplay();
         }
 
-        function switchAdminTab(tabName) {
-            const tabs = ['items', 'settings', 'design'];
-            tabs.forEach(t => {
-                const tabContent = document.getElementById(`admin-tab-${t}`);
-                const tabBtn = document.getElementById(`tab-btn-${t}`);
-                if (t === tabName) {
-                    tabContent.classList.remove('hidden');
-                    tabBtn.className = "pb-3 border-b-2 border-white font-medium text-white transition-all";
-                } else {
-                    tabContent.classList.add('hidden');
-                    tabBtn.className = "pb-3 border-b-2 border-transparent text-zinc-500 hover:text-zinc-300 transition-all";
-                }
-            });
+        function loadAdminValuesToForm() {
+            const settings = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS) || JSON.stringify(DEFAULT_SETTINGS));
+            document.getElementById("admin-max-draws").value = settings.maxDraws;
+            document.getElementById("admin-speech-setting").value = settings.winSpeech;
+            document.getElementById("admin-title-text").value = settings.title;
+            document.getElementById("admin-desc-text").value = settings.description;
+            document.getElementById("admin-bg-color").value = settings.bgColor;
+            document.getElementById("admin-bg-image").value = settings.bgImage;
+            document.getElementById("admin-text-color").value = settings.textColor;
+            document.getElementById("admin-btn-color").value = settings.btnColor;
+            document.getElementById("admin-custom-css").value = settings.customCss;
+
+            renderAdminItemsList();
         }
 
-        function renderAdminItemsTable() {
-            const tbody = document.getElementById('admin-items-table-body');
-            tbody.innerHTML = '';
+        function renderAdminItemsList() {
+            const items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            const container = document.getElementById("admin-items-list");
+            container.innerHTML = "";
 
-            appState.items.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-zinc-900 hover:bg-zinc-900/40 transition-all";
-                
-                const imgHtml = item.image ? 
-                    `<img src="${item.image}" class="w-8 h-8 object-cover rounded-sm border border-zinc-800">` : 
-                    `<span class="text-[10px] text-zinc-600">無し</span>`;
-
-                tr.innerHTML = `
-                    <td class="p-3">${imgHtml}</td>
-                    <td class="p-3 font-medium text-white">${item.name}</td>
-                    <td class="p-3 text-zinc-300">${item.count} 個</td>
-                    <td class="p-3 text-right space-x-2">
-                        <button onclick="openEditItemModal(${index})" class="text-[10px] uppercase border border-zinc-700 px-2 py-1 text-zinc-300 hover:bg-zinc-800 rounded-sm">編集</button>
-                        <button onclick="deleteAdminItem(${index})" class="text-[10px] uppercase border border-red-900/50 px-2 py-1 text-red-400 hover:bg-red-950/30 rounded-sm">削除</button>
-                    </td>
+            items.forEach((item, index) => {
+                const div = document.createElement("div");
+                div.className = "bg-neutral-900 p-3 border border-neutral-800 flex flex-col space-y-2 text-xs";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <input type="text" value="${escapeHtml(item.name)}" data-index="${index}" data-field="name" placeholder="アイテム名" class="admin-item-input flex-grow px-3 py-2 bg-neutral-950 border border-neutral-700 text-white">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-neutral-500 text-[10px]">個数(1-100):</span>
+                            <input type="number" min="1" max="100" value="${item.count}" data-index="${index}" data-field="count" class="admin-item-input w-20 px-3 py-2 bg-neutral-950 border border-neutral-700 text-white font-mono">
+                        </div>
+                        <button onclick="removeAdminItem(${index})" class="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition text-[10px] border border-neutral-700">削除</button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" value="${escapeHtml(item.image || '')}" data-index="${index}" data-field="image" placeholder="画像URL" class="admin-item-input flex-grow px-3 py-2 bg-neutral-950 border border-neutral-700 text-neutral-400 text-[11px]">
+                        <input type="file" accept="image/*" onchange="handleImageUpload(event, ${index})" class="text-[10px] text-neutral-500">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" value="${escapeHtml(item.info || '')}" data-index="${index}" data-field="info" placeholder="追加情報（詳細）" class="admin-item-input flex-grow px-3 py-2 bg-neutral-950 border border-neutral-700 text-neutral-400 text-[11px]">
+                    </div>
                 `;
-                tbody.appendChild(tr);
+                container.appendChild(div);
             });
         }
 
-        // Save Admin Settings
-        function saveAdminSettings() {
-            appState.settings.dialogue = document.getElementById('admin-setting-dialogue').value;
-            appState.settings.maxDraws = parseInt(document.getElementById('admin-setting-maxdraws').value) || 3;
-            appState.settings.title = document.getElementById('admin-setting-title').value;
-            appState.settings.bgColor = document.getElementById('admin-setting-bgcolor').value;
-            appState.settings.bgImage = document.getElementById('admin-setting-bgimage').value;
-            appState.settings.textColor = document.getElementById('admin-setting-textcolor').value;
-            appState.settings.btnColor = document.getElementById('admin-setting-btncolor').value;
-            appState.settings.customCss = document.getElementById('admin-setting-customcss').value;
-
-            saveSettings();
-            applySettings();
-            updateUI();
-            showToast("設定を保存しました。");
+        function addNewItemRow() {
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            items.push({ name: "新規アイテム", count: 10, image: "", info: "追加されたアイテム" });
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+            renderAdminItemsList();
         }
 
-        // Reset User Draw Count
-        function resetUserDrawCount() {
-            appState.dailyUsage.count = 0;
-            saveDailyUsage();
-            updateUI();
-            showToast("本日のクジ引き回数をリセットしました。");
+        // Direct code addition feature for multiple items
+        function addBatchItemsCode() {
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            const batch = [
+                { name: "コード追加アイテム A", count: 15, image: "", info: "Code injected item A" },
+                { name: "コード追加アイテム B", count: 30, image: "", info: "Code injected item B" }
+            ];
+            items.push(...batch);
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+            renderAdminItemsList();
+            showModalCustomMessage("コードから複数アイテムを追加しました。");
         }
 
-        // Item Add / Edit Form Modal
-        function openAddItemModal() {
-            document.getElementById('item-form-title').innerText = "新規アイテム追加";
-            document.getElementById('edit-item-index').value = "-1";
-            document.getElementById('item-name-input').value = "";
-            document.getElementById('item-count-input').value = "10";
-            document.getElementById('item-image-file').value = "";
-            document.getElementById('item-image-base64').value = "";
-            document.getElementById('item-image-preview').src = "";
-            document.getElementById('item-image-preview-container').classList.add('hidden');
-            document.getElementById('item-form-modal').classList.remove('hidden');
+        function removeAdminItem(index) {
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            items.splice(index, 1);
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+            renderAdminItemsList();
         }
 
-        function openEditItemModal(index) {
-            const item = appState.items[index];
-            document.getElementById('item-form-title').innerText = "アイテム編集";
-            document.getElementById('edit-item-index').value = index;
-            document.getElementById('item-name-input').value = item.name;
-            document.getElementById('item-count-input').value = item.count;
-            document.getElementById('item-image-file').value = "";
-            document.getElementById('item-image-base64').value = item.image || "";
-
-            const preview = document.getElementById('item-image-preview');
-            const container = document.getElementById('item-image-preview-container');
-            if (item.image) {
-                preview.src = item.image;
-                container.classList.remove('hidden');
-            } else {
-                preview.src = "";
-                container.classList.add('hidden');
-            }
-
-            document.getElementById('item-form-modal').classList.remove('hidden');
-        }
-
-        function closeItemFormModal() {
-            document.getElementById('item-form-modal').classList.add('hidden');
-        }
-
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
+        function handleImageUpload(event, index) {
+            const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const base64 = event.target.result;
-                document.getElementById('item-image-base64').value = base64;
-                const preview = document.getElementById('item-image-preview');
-                preview.src = base64;
-                document.getElementById('item-image-preview-container').classList.remove('hidden');
+            reader.onload = function(e) {
+                let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+                items[index].image = e.target.result;
+                localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+                renderAdminItemsList();
             };
             reader.readAsDataURL(file);
         }
 
-        function saveItemForm(e) {
-            e.preventDefault();
-            const index = parseInt(document.getElementById('edit-item-index').value);
-            const name = document.getElementById('item-name-input').value;
-            const count = parseInt(document.getElementById('item-count-input').value) || 1;
-            const image = document.getElementById('item-image-base64').value;
+        function saveAdminSettings() {
+            const settings = {
+                maxDraws: parseInt(document.getElementById("admin-max-draws").value) || 3,
+                winSpeech: document.getElementById("admin-speech-setting").value,
+                title: document.getElementById("admin-title-text").value,
+                description: document.getElementById("admin-desc-text").value,
+                bgColor: document.getElementById("admin-bg-color").value,
+                bgImage: document.getElementById("admin-bg-image").value,
+                textColor: document.getElementById("admin-text-color").value,
+                btnColor: document.getElementById("admin-btn-color").value,
+                customCss: document.getElementById("admin-custom-css").value
+            };
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
 
-            if (index === -1) {
-                appState.items.push({ name, count, image });
-                showToast("アイテムを追加しました。");
-            } else {
-                appState.items[index] = { name, count, image };
-                showToast("アイテムを更新しました。");
-            }
-
-            saveItems();
-            renderAdminItemsTable();
-            closeItemFormModal();
-        }
-
-        function deleteAdminItem(index) {
-            if (confirm("このアイテムを削除してもよろしいですか？")) {
-                appState.items.splice(index, 1);
-                saveItems();
-                renderAdminItemsTable();
-                showToast("アイテムを削除しました。");
-            }
-        }
-
-        function addDefaultInitialItems() {
-            DEFAULT_ITEMS.forEach(d => {
-                appState.items.push({ ...d });
+            let items = JSON.parse(localStorage.getItem(STORAGE_KEY_ITEMS) || "[]");
+            const inputs = document.querySelectorAll(".admin-item-input");
+            inputs.forEach(input => {
+                const idx = parseInt(input.getAttribute("data-index"));
+                const field = input.getAttribute("data-field");
+                if (items[idx]) {
+                    if (field === "count") {
+                        items[idx][field] = Math.min(100, Math.max(1, parseInt(input.value) || 1));
+                    } else {
+                        items[idx][field] = input.value;
+                    }
+                }
             });
-            saveItems();
-            renderAdminItemsTable();
-            showToast("初期データアイテムを一括追加しました。");
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
+
+            showModalCustomMessage("設定を保存しました。");
+            applySettings();
+            updateDrawCountDisplay();
         }
 
-        // Toast Helper (replaces alert/confirm standard notifications)
-        function showToast(message) {
-            const box = document.getElementById('toast-box');
-            document.getElementById('toast-message').innerText = message;
-            box.classList.remove('translate-y-20', 'opacity-0');
-            box.classList.add('translate-y-0', 'opacity-100');
+        function adminResetDailyCount() {
+            if (confirm("全ユーザーの本日の試行回数をリセットしますか？")) {
+                let userData = JSON.parse(localStorage.getItem(STORAGE_KEY_USER_DATA) || "{}");
+                userData.drawCount = 0;
+                localStorage.setItem(STORAGE_KEY_USER_DATA, JSON.stringify(userData));
+                updateDrawCountDisplay();
+                showModalCustomMessage("試行回数をリセットしました。");
+            }
+        }
 
+        function showModalCustomMessage(msg) {
+            const note = document.createElement("div");
+            note.className = "fixed top-5 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 text-xs tracking-wider z-50 shadow-2xl transition-all duration-300";
+            note.textContent = msg;
+            document.body.appendChild(note);
             setTimeout(() => {
-                box.classList.remove('translate-y-0', 'opacity-100');
-                box.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+                note.style.opacity = "0";
+                setTimeout(() => note.remove(), 300);
+            }, 2000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
         }
     </script>
 </body>
